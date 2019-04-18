@@ -16,7 +16,6 @@ namespace imageserver
 
             logger = new OLIO.Log.Logger();
             logger.Info("OLIO.ImageServer v0.001");
-            logger.Warn("test warn.");
             //logger.Error("show Error.");
 
 

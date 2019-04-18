@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\olio.lib.httpserver\olio.lib.httpserver.csproj" />
     <ProjectReference Include="..\olio.lib.log\olio.lib.log.csproj" />
+    <ProjectReference Include="..\olio.lib.rocksdb\olio.lib.rocksdb.csproj" />
   </ItemGroup>
 
   <ItemGroup>
