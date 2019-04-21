@@ -17,6 +17,13 @@ namespace OLIO.ImageServer
             var bytes = System.Text.Encoding.UTF8.GetBytes(user);
             return tableid_User.Concat(bytes).ToArray();
         }
+        ulong db_GetHeight()
+        {
+            using (var snap = db.UseSnapShot())
+            {
+                return snap.DataHeight;
+            }
+        }
         byte[] db_GetRaw(byte[] id)
         {
             using (var snap = this.db.UseSnapShot())

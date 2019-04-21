@@ -14,6 +14,7 @@ namespace OLIO.ImageServer
         {
             Newtonsoft.Json.Linq.JObject obj = new Newtonsoft.Json.Linq.JObject();
             obj["msg"] = "this is help method";
+            obj["height"] = db_GetHeight().ToString();
             return obj;
         }
         async Task<JObject> rpc_UserNew(JObject requestobj)
