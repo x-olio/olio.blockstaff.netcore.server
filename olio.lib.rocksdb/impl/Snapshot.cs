@@ -114,7 +114,7 @@ namespace OLIO
         {
             var tablekey = Helper.CalcKey(tableid, null, SplitWord.TableInfo);
             var data = Native.Instance.rocksdb_get(this.dbPtr, this.readopHandle, tablekey);
-            if (data == null)
+            if (data == null || data.Length == 0)
                 return null;
             return TableInfo.FromRaw(DBValue.FromRaw(data).value);
         }
@@ -122,7 +122,7 @@ namespace OLIO
         {
             var tablekey = Helper.CalcKey(tableid, null, SplitWord.TableInfo);
             var data = Native.Instance.rocksdb_get(this.dbPtr, this.readopHandle, tablekey);
-            if (data == null)
+            if (data == null || data.Length == 0)
                 return null;
             return data;
         }

@@ -47,12 +47,12 @@ namespace OLIO.ImageServer
 
             server.SetHttpAction("/getraw", http_GetRaw);
             server.SetHttpAction("/uploadraw", http_UploadRaw);
-            server.SetHttpAction("/getusernamedasset", http_GetUserNamedAsset);
+            server.SetHttpAction("/getuserasset", http_GetUserNamedAsset);
             server.AddJsonRPC("/rpc", "help", rpc_Help);
             server.AddJsonRPC("/rpc", "user_new", rpc_UserNew);
             server.AddJsonRPC("/rpc", "user_login", rpc_UserLogin);
-            server.AddJsonRPC("/rpc", "user_namedasset", rpc_UserNamedAsset);
-
+            server.AddJsonRPC("/rpc", "user_setnamedasset", rpc_SetUserNamedAsset);
+            server.AddJsonRPC("/rpc", "user_listnamedasset", rpc_ListUserNamedAsset);
             server.Start(config.ServerPort);
             logger.Info("http server on=" + config.ServerPort);
 
@@ -130,8 +130,24 @@ namespace OLIO.ImageServer
             using (var snap = this.db.UseSnapShot())
             {
                 var dbv = snap.GetValue(tableid, System.Text.Encoding.UTF8.GetBytes(key));
+                if (dbv == null || dbv.value == null || dbv.value.Length == 0)
+                    return null;
                 return dbv.value;
             }
+        }
+        string[] db_ListNamedAsset(string user)
+        {
+            List<string> list = new List<string>();
+            var tableid = GetUserNamedAssetTableID(user);
+            using (var snap = this.db.UseSnapShot())
+            {
+                var keyfinder = snap.CreateKeyFinder(tableid);
+                foreach (var key in keyfinder)
+                {
+                    list.Add(System.Text.Encoding.UTF8.GetString(key));
+                }
+            }
+            return list.ToArray();
         }
         System.Collections.Concurrent.ConcurrentDictionary<string, byte[]> tokens =
         new System.Collections.Concurrent.ConcurrentDictionary<string, byte[]>();
@@ -175,8 +191,8 @@ namespace OLIO.ImageServer
             try
             {
                 user = (string)requestobj["params"][0];
-                if(user==null)
-                    throw new Exception("error param:user"); 
+                if (user == null)
+                    throw new Exception("error param:user");
             }
             catch
             {
@@ -207,19 +223,90 @@ namespace OLIO.ImageServer
         }
         async Task<JObject> rpc_UserLogin(JObject requestobj)
         {
-            var user = (string)requestobj["user"];
-            var passhash = Tool.HexDecode((string)requestobj["passhash"]);
-            var token = UserLogin(user, passhash);
+            bool paramfail = false;
+            string user = null;
+            byte[] passhash = null;
+            try
+            {
+                user = (string)requestobj["params"][0];
+                passhash = Tool.HexDecode((string)requestobj["params"][1]);
+            }
+            catch
+            {
+                paramfail = true;
+            }
             Newtonsoft.Json.Linq.JObject obj = new Newtonsoft.Json.Linq.JObject();
-            obj["token"] = token;
+            if (paramfail == true)
+            {
+                obj["result"] = false;
+                obj["msg"] = "param fail,need string 'user',hexstr 'passhash'";
+                return obj;
+            }
+            var token = UserLogin(user, passhash);
+            obj["result"] = token != null;
+            if (token != null)
+            {
+                obj["token"] = Tool.HexEncode(token);
+            }
+
             return obj;
         }
-        async Task<JObject> rpc_UserNamedAsset(JObject requestobj)
+        async Task<JObject> rpc_SetUserNamedAsset(JObject requestobj)
         {
-            var user = (string)requestobj["user"];
-            var token = Tool.HexDecode((string)requestobj["token"]);
-            var blogin = CheckUserLogin(user, token);
+            string user = null;
+            byte[] token = null;
+            string key = null;
+            byte[] data = null;
+            bool paramfail = false;
             Newtonsoft.Json.Linq.JObject obj = new Newtonsoft.Json.Linq.JObject();
+            try
+            {
+                user = (string)requestobj["params"][0];
+            }
+            catch
+            {
+                paramfail = true;
+                obj["msg"] = "error param user,need[user(string),token(hexstr),key(string),data(hexstr)]";
+            }
+            if (!paramfail)
+                try
+                {
+                    token = Tool.HexDecode((string)requestobj["params"][1]);
+                }
+                catch
+                {
+                    paramfail = true;
+                    obj["msg"] = "error param token,need[user(string),token(hexstr),key(string),data(hexstr)]";
+                }
+            if (!paramfail)
+
+                try
+                {
+                    key = (string)requestobj["params"][2];
+                }
+                catch
+                {
+                    paramfail = true;
+                    obj["msg"] = "error param key,need[user(string),token(hexstr),key(string),data(hexstr)]";
+                }
+            if (!paramfail)
+
+                try
+                {
+                    data = Tool.HexDecode((string)requestobj["params"][3]);
+                }
+                catch
+                {
+                    paramfail = true;
+                    obj["msg"] = "error param data,need[user(string),token(hexstr),key(string),data(hexstr)]";
+                }
+            if (paramfail)
+            {
+                obj["result"] = false;
+                return obj;
+            }
+
+            var blogin = CheckUserLogin(user, token);
 
             if (blogin == false)
             {
@@ -227,12 +314,59 @@ namespace OLIO.ImageServer
                 obj["msg"] = "login fail.";
                 return obj;
             }
-            var key = (string)requestobj["key"];
-            var value = Tool.HexDecode((string)requestobj["value"]);
-            var b = db_SetNamedAsset(user, key, value);
+            var b = db_SetNamedAsset(user, key, data);
             obj["result"] = b;
             return obj;
 
+        }
+        async Task<JObject> rpc_ListUserNamedAsset(JObject requestobj)
+        {
+            string user = null;
+            byte[] token = null;
+            bool paramfail = false;
+            Newtonsoft.Json.Linq.JObject obj = new Newtonsoft.Json.Linq.JObject();
+            try
+            {
+                user = (string)requestobj["params"][0];
+            }
+            catch
+            {
+                paramfail = true;
+                obj["msg"] = "error param user,need[user(string),token(hexstr),key(string),data(hexstr)]";
+            }
+            if (!paramfail)
+                try
+                {
+                    token = Tool.HexDecode((string)requestobj["params"][1]);
+                }
+                catch
+                {
+                    paramfail = true;
+                    obj["msg"] = "error param token,need[user(string),token(hexstr),key(string),data(hexstr)]";
+                }
+
+            if (paramfail)
+            {
+                obj["result"] = false;
+                return obj;
+            }
+
+            var blogin = CheckUserLogin(user, token);
+
+            if (blogin == false)
+            {
+                obj["result"] = false;
+                obj["msg"] = "login fail.";
+                return obj;
+            }
+            string[] names = db_ListNamedAsset(user);
+            var array = new Newtonsoft.Json.Linq.JArray();
+            obj["list"] = array;
+            foreach (var item in names)
+            {
+                array.Add(item);
+            }
+            return obj;
         }
         async Task http_GetRaw(HttpContext context)
         {
@@ -273,16 +407,61 @@ namespace OLIO.ImageServer
         async Task http_GetUserNamedAsset(HttpContext context)
         {
             var formdat = await OLIO.http.server.FormData.FromRequest(context.Request);
-            var user = formdat.mapParams["user"];
-            var key = formdat.mapParams["key"];
+            string user = null;
+            string key = null;
+            string format = null;
+            try
+            {
+                user = formdat.mapParams["user"];
+                key = formdat.mapParams["key"];
+                format = formdat.mapParams["format"].ToLower();
+                if (user == null || key == null)
+                    throw new Exception();
+            }
+            catch
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("need params user & key");
+                return;
+            }
             var data = db_GetNamedAsset(user, key);
             if (data == null)
             {
                 context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("not found asset");
             }
             else
             {
-                await context.Response.Body.WriteAsync(data);
+                if (format == "hexstr")
+                {
+                    var txt = Tool.HexEncode(data);
+                    context.Response.ContentType = "text/plain";
+
+
+                        { await context.Response.WriteAsync(txt);
+                    }
+                    return;
+                }
+                else if (format == "string")
+                {
+                    context.Response.ContentType = "text/plain";
+
+                    var txt = System.Text.Encoding.UTF8.GetString(data);
+                    await context.Response.WriteAsync(txt);
+                    return;
+
+                }
+                else if(format=="image")
+                {
+                    context.Response.ContentType = "image/png";
+                    await context.Response.Body.WriteAsync(data);
+
+                }
+                else
+                {
+                    context.Response.ContentType = "application/octet-stream";
+                    await context.Response.Body.WriteAsync(data);
+                }
             }
         }
     }

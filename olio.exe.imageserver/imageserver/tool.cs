@@ -51,9 +51,18 @@ namespace OLIO.ImageServer
             for(var i=0;i<outb.Length;i++)
             {
                 var subs = hexstr.Substring(i * 2, 2);
-                outb[i] = byte.Parse(subs);
+                outb[i] = byte.Parse(subs,System.Globalization.NumberStyles.HexNumber);
             }
             return outb;
+        }
+        public static string HexEncode(byte[] data)
+        {
+            string outs = "";
+            for(var i=0;i<data.Length;i++)
+            {
+                outs += data[i].ToString("X02");
+            }
+            return outs;
         }
     }
 }
