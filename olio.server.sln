@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "olio.lib.log", "olio.lib.lo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "olio.lib.rocksdb", "olio.lib.rocksdb\olio.lib.rocksdb.csproj", "{39033905-D367-4F4C-9C44-AF762105B74D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "olio.server.test", "olio.server.test\olio.server.test.csproj", "{14F9A44F-CBFE-40A5-B44A-8F6554B2CF1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{39033905-D367-4F4C-9C44-AF762105B74D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39033905-D367-4F4C-9C44-AF762105B74D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39033905-D367-4F4C-9C44-AF762105B74D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14F9A44F-CBFE-40A5-B44A-8F6554B2CF1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14F9A44F-CBFE-40A5-B44A-8F6554B2CF1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14F9A44F-CBFE-40A5-B44A-8F6554B2CF1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14F9A44F-CBFE-40A5-B44A-8F6554B2CF1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
