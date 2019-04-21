@@ -4,6 +4,18 @@ getuserasset
    格式 hexstr（返回hexstr） ，string(转换为string)，image（转换为image），其它（二进制返回）
 http://127.0.0.1/getuserasset?user=abc&key=hello&format=image&r=1112
 
+
+getraw
+  参数[id]
+  00替换为资源assetid
+http://127.0.0.1/getraw?id=00
+
+
+uploadraw 必须使用post方式
+  参数[user,token,postfile]
+http://127.0.0.1/uploadraw 
+   post user,token,file[0]
+
 rpc方法
 
 help[方法：jsonrpc 功能：帮助]

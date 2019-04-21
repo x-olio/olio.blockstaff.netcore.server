@@ -33,7 +33,15 @@ namespace OLIO.ImageServer
         {
             var writetask = new WriteTask();
             byte[] key = Tool.Sha256(asset);
-            writetask.Put(tableid_RawAsset, key, DBValue.FromValue(DBValue.Type.Bytes, asset));
+            using (var snap = db.UseSnapShot())
+            {
+                var data = snap.GetValue(tableid_RawAsset, key);
+                if(data!=null&&data.value!=null&&data.value.Length!=0)
+                {
+                    return key;
+                }
+            }
+                writetask.Put(tableid_RawAsset, key, DBValue.FromValue(DBValue.Type.Bytes, asset));
             this.db.Write(writetask);
             return key;
         }

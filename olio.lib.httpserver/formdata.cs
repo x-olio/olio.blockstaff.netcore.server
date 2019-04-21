@@ -169,7 +169,7 @@ namespace OLIO.http.server
 
                                 byte[] ddata = new byte[iTagNext - iDataStart - 2];
                                 Array.Copy(allfile, iDataStart, ddata, 0, ddata.Length);
-                                if (infos.Contains("application/octet-stream"))
+                                if (infos.Contains("application/octet-stream")||infos.Contains("filename"))
                                 {
                                     data.mapFiles[name] = ddata;
                                 }
