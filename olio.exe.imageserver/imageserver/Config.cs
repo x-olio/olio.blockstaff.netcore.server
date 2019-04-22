@@ -8,6 +8,10 @@ namespace OLIO.ImageServer
     class Config
     {
         public int ServerPort;
+        public int ServerPortHttps = 0;
+        public string PFXPath = null;
+        public string PFXPassword = null;
+
         public string DBPath;
         static string[] GetStringArrayFromJson(JArray jarray)
         {
@@ -28,6 +32,12 @@ namespace OLIO.ImageServer
             Config c = new Config();
             c.ServerPort = (int)jobj["ServerPort"];
             c.DBPath = (string)jobj["DBPath"];
+            if(jobj.ContainsKey("ServerPortHttps"))
+            {
+                c.ServerPortHttps = (int)jobj["ServerPortHttps"];
+                c.PFXPath = (string)jobj["PFXPath"];
+                c.PFXPassword = (string)jobj["PFXPassword"];
+            }
             return c;
         }
     }

@@ -1,4 +1,7 @@
 ﻿{
   "ServerPort": 80, //链配置,
+  "ServerPortHttps": 8001,
+  "PFXPath": "user-rsa.pfx.bin",
+  "PFXPassword": "123456",
   "DBPath": "DB"
 }

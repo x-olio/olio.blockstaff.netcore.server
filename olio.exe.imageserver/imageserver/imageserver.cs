@@ -46,7 +46,7 @@ namespace OLIO.ImageServer
             server.AddJsonRPC("/rpc", "user_login", rpc_UserLogin);
             server.AddJsonRPC("/rpc", "user_setnamedasset", rpc_SetUserNamedAsset);
             server.AddJsonRPC("/rpc", "user_listnamedasset", rpc_ListUserNamedAsset);
-            server.Start(config.ServerPort);
+            server.Start(config.ServerPort,config.ServerPortHttps,config.PFXPath,config.PFXPassword);
             logger.Info("http server on=" + config.ServerPort);
 
 
